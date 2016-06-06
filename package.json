@@ -1,0 +1,25 @@
+{
+  "name": "ussd-menu-builder",
+  "version": "0.0.0",
+  "description": "Easily compose USSD menus using states, compatible with Africastalking API",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/habbes/ussd-menu-builder"
+  },
+  "keywords": [
+    "ussd-menu-builder",
+    "ussd",
+    "africastalking",
+    "ussd-menu"
+  ],
+  "author": "Habbes <hello@habbes.xyz>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/habbes/ussd-menu-builder/issues"
+  },
+  "homepage": "https://github.com/habbes/ussd-menu-builder"
+}
