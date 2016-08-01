@@ -13,7 +13,7 @@ menu.startState({
         
         menu.con('Welcome. Choose option:' +
             '\n1. Show Balance' +
-            '\n2. Buy Airtime')
+            '\n2. Buy Airtime');
     },
     next: {
         '1': 'showBalance',
@@ -42,9 +42,9 @@ menu.state('buyAirtime', {
 menu.state('buyAirtime.amount', {
     run: function(state){
         var amount = Number(state.val);
-        buyAmount(menu.args.phoneNumber).then(function(res){
+        buyAirtime(menu.args.phoneNumber, amount).then(function(res){
             menu.end('Airtime bought successfully.');
-        })
+        });
     }
 });
 
