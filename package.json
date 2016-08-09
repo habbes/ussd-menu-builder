@@ -23,6 +23,12 @@
   },
   "homepage": "https://github.com/habbes/ussd-menu-builder",
   "dependencies": {
-    "async": "^2.0.1"
+    "async": "^2.0.1",
+    "mocha": "^3.0.2",
+    "chai": "^3.5.0"
+  },
+  "devDependencies": {
+    "coveralls": "^2.11.12",
+    "mocha-lcov-reporter": "^1.2.0"
   }
 }
