@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/habbes/ussd-menu-builder/issues"
   },
-  "homepage": "https://github.com/habbes/ussd-menu-builder"
+  "homepage": "https://github.com/habbes/ussd-menu-builder",
+  "dependencies": {
+    "async": "^2.0.1"
+  }
 }
