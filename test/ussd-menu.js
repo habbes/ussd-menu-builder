@@ -63,13 +63,6 @@ describe('UssdMenu', function(){
 
     describe('State Resolution', function(){
         
-        /*
-        - Spec
-        Start with start state
-        it should refer to defaultNext if link not found
-        it should redirect to a different state using the go method
-        */
-        
         it('should run the start state if no empty rule exists', function(done){
             args.text = '';
             menu.startState({
