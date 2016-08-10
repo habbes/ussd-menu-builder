@@ -1,6 +1,6 @@
 {
   "name": "ussd-menu-builder",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Easily compose USSD menus using states, compatible with Africastalking API",
   "main": "index.js",
   "scripts": {
