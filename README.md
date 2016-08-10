@@ -174,7 +174,7 @@ state.
 Use **```menu.val```** property to access the current user input.
 
 #### Accessing ussd parameters
-You can access the ussd parameters through the **```menu.args``** object.
+You can access the ussd parameters through the **```menu.args```** object.
 This parameters should come from the API Gateway and are passed to the
 ```menu.run``` method.
 
@@ -280,7 +280,6 @@ an empty string as key in ```next``` to redirect to another state.
 
 ```javascript
 menu.startState({
-    // run function omitted
     next: {
         '': function(){
             if(user){
