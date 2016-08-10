@@ -28,6 +28,7 @@
     "chai": "^3.5.0"
   },
   "devDependencies": {
+    "blanket": "^1.2.3",
     "coveralls": "^2.11.12",
     "mocha-lcov-reporter": "^1.2.0"
   }
