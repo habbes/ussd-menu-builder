@@ -384,3 +384,131 @@ with nested submenus by linking states appropriately. In addition you
 could use a naming convention of your choice to make it clearer to see how
 states are related. In these examples I used the following convention of 
 separating menu levels with a dot.
+
+## Sessions
+You can store temporary user data that persists through an entire session.
+The library provides a way for you to define your own custom session
+handler so you're free to use whatever storage backend or driver you want.
+The menu provides an easy interface to set and retrieve session data
+within states based on the implementation you provide.
+
+### Configuring handlers
+
+The **`menu.sessionConfig(config)`** method is used to define your session
+handler. It accepts an object with the implementations of the following
+methods:
+
+- `start` [**`function(sessionId, callback)`**]: used to initialize a new
+session, invoked internally by the `menu.run()` method before any state
+is called.
+- `end` [**`function(sessionId, callback)`**]: used to delete current session,
+invoked internally by the `menu.end()` method.
+- `set` [**`function(sessionId, key, value, callback)`**]: used to store
+a key-value pair in the current session, invoked internally by
+`menu.session.set()`.
+- `get` [**`function(sessionId, key, callback)`**]: used to retrieve a
+value from the current session by key, invoked internally by 
+`menu.session.get()`.
+
+#### Example using local memory for storage
+
+```javascript
+
+let sessions = {};
+
+let menu = new UssdMenu();
+menu.sessionConfig({
+    start: (sessionId, callback){
+        // initialize current session if it doesn't exist
+        // this is called by menu.run()
+        if(!(sessionId in sessions)) sessions[sessionId] = {};
+        callback();
+    },
+    end: (sessionId, callback){
+        // clear current session
+        // this is called by menu.end()
+        delete sessions[sessionId];
+        callback();
+    },
+    set: (sessionId, key, value, callback) => {
+        // store key-value pair in current session
+        sessions[sessionId][key] = value;
+        callback();
+    },
+    get: (sessionId, key, callback){
+        // retrieve value by key in current session
+        let value = sessions[sessionId][key];
+        callback(null, value);
+    }
+});
+
+```
+
+***
+**Note:** Instead of callbacks, you may also return promises from
+those methods:
+```javascript
+menu.sessionConfig({
+    ...
+    get: function(sessionId, key){
+        return new Promise((resolve, reject) => {
+            let value = sessions[sessionId][key];
+            resolve(session);
+        });
+    }
+})
+```
+
+
+### Setting and getting data from the current session
+
+And then to add and retrieve data inside states, use the
+`menu.session` object:
+
+```javascript
+
+menu.state('someState', {
+    run: _ => {
+        let firstName = menu.val;
+        menu.session.set('firstName', firstName)
+        .then( _ => {
+            menu.con('Enter your last name');
+        })
+    }
+    ...
+})
+...
+menu.state('otherState', {
+    run: _ => {
+        menu.session.get('firstName')
+        .then( firstName => {
+            // do something with the value
+            console.log(lastName);
+            ...
+            menu.con('Next');
+        })
+    }
+})
+...
+```
+
+***
+**Note**: The `menu.session`'s methods also work with callbacks:
+```javascript
+menu.session.set('key', 'value', (err) => {
+    menu.con('...');
+});
+
+menu.session.get('key', (err, value) => {
+    console.log(value);
+    ...
+});
+```
+***
+
+***
+**Note**: It's not required to configure a session handler. You can
+access your storage driver directly if you prefer. However if you
+do configure a handler using the above method then you should provide
+implementations for all the 4 methods as shown above..
+***
