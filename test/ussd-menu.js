@@ -420,6 +420,264 @@ describe('UssdMenu', function(){
         });
 
     });
+
+
+    describe('Sessions', function(){       
+        
+        describe('Callback-based config', function(){
+            let menu;
+            let session;
+            let args = {
+                serviceCode: '*111#',
+                phoneNumber: '123456',
+                sessionId: '324errw44we'
+            };
+            let config = {
+                start: (id, cb) => {
+                    if(!(id in session)) session[id] = {};
+                    cb();
+                },
+                end: (id, cb) => {
+                    delete session[id];
+                    cb();
+                },
+                get: (id, key, cb) => {
+                    let val = session[id][key];
+                    cb(null, val);
+                },
+                set: (id, key, val, cb) => {
+                    session[id][key] = val;
+                    cb();
+                }
+            };
+
+
+            it('should manage session using promises', function(done){
+                session = {};
+                menu = new UssdMenu();
+                menu.sessionConfig(config);
+                menu.startState({
+                    run: () => {
+                        menu.session.set('name', 'Habbes').then( _ => {
+                            expect(session[args.sessionId].name).to.equal('Habbes');
+                            menu.con('Next');
+                        })
+                        .catch(done);
+                    },
+                    next: {
+                        '1': 'state1'
+                    }
+                });
+
+                menu.state('state1', {
+                    run: _ => {
+                        menu.session.get('name').then( val => {
+                            expect(val).to.equal('Habbes');
+                            menu.end();
+                        })
+                        .catch(done);
+                    }
+                });
+
+                args.text = '';
+                menu.run(args, _ => {
+                    expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
+                    args.text = '1';
+                    menu.run(args, _=> {
+                        process.nextTick(_ => {
+                            // expect session to be deleted
+                            expect(session[args.sessionId]).to.not.be.ok;
+                            done();
+                        });
+                        
+                    });
+                });
+
+
+                
+            });
+
+
+            it('should manage session using callbacks', function(done){
+                session = {};
+                menu = new UssdMenu();
+                menu.sessionConfig(config);
+                menu.startState({
+                    run: () => {
+                        menu.session.set('name', 'Habbes', err => {
+                            if(err) return done(err);
+                            expect(session[args.sessionId].name).to.equal('Habbes');
+                            menu.con('Next');
+                        });
+                    },
+                    next: {
+                        '1': 'state1'
+                    }
+                });
+
+                menu.state('state1', {
+                    run: _ => {
+                        menu.session.get('name', (err, val) => {
+                            if(err) return done(err);
+                            expect(val).to.equal('Habbes');
+                            menu.end();
+                        });
+                    }
+                });
+
+                args.text = '';
+                menu.run(args, _ => {
+                    expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
+                    args.text = '1';
+                    menu.run(args, _=> {
+                        process.nextTick(_ => {
+                            // expect session to be deleted
+                            expect(session[args.sessionId]).to.not.be.ok;
+                            done();
+                        });
+                        
+                    });
+                });
+
+
+                
+            });
+
+
+        });
+
+
+        describe('Promise-based config', function(){
+            let menu;
+            let session;
+            let args = {
+                serviceCode: '*111#',
+                phoneNumber: '123456',
+                sessionId: '324errw44we'
+            };
+            let config = {
+                start: (id) => {
+                    return new Promise((resolve, reject) => {
+                        if(!(id in session)) session[id] = {};
+                        return resolve();
+                    });
+                },
+                end: (id) => {
+                    return new Promise((resolve, reject) => {
+                        delete session[id];
+                        return resolve();
+                    });
+                },
+                get: (id, key) => {
+                    return new Promise((resolve, reject) => {
+                        let val = session[id][key];
+                        return resolve(val);
+                    });
+                },
+                set: (id, key, val) => {
+                    return new Promise((resolve, reject) => {
+                        session[id][key] = val;
+                        return resolve();
+                    });
+                }
+            };
+
+
+            it('should manage session using promises', function(done){
+                session = {};
+                menu = new UssdMenu();
+                menu.sessionConfig(config);
+                menu.startState({
+                    run: () => {
+                        menu.session.set('name', 'Habbes').then( _ => {
+                            expect(session[args.sessionId].name).to.equal('Habbes');
+                            menu.con('Next');
+                        })
+                        .catch(done);
+                    },
+                    next: {
+                        '1': 'state1'
+                    }
+                });
+
+                menu.state('state1', {
+                    run: _ => {
+                        menu.session.get('name').then( val => {
+                            expect(val).to.equal('Habbes');
+                            menu.end();
+                        })
+                        .catch(done);
+                    }
+                });
+
+                args.text = '';
+                menu.run(args, _ => {
+                    expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
+                    args.text = '1';
+                    menu.run(args, _=> {
+                        process.nextTick(_ => {
+                            // expect session to be deleted
+                            expect(session[args.sessionId]).to.not.be.ok;
+                            done();
+                        });
+                        
+                    });
+                });
+
+
+                
+            });
+
+
+            it('should manage session using callbacks', function(done){
+                session = {};
+                menu = new UssdMenu();
+                menu.sessionConfig(config);
+                menu.startState({
+                    run: () => {
+                        menu.session.set('name', 'Habbes', err => {
+                            if(err) return done(err);
+                            expect(session[args.sessionId].name).to.equal('Habbes');
+                            menu.con('Next');
+                        });
+                    },
+                    next: {
+                        '1': 'state1'
+                    }
+                });
+
+                menu.state('state1', {
+                    run: _ => {
+                        menu.session.get('name', (err, val) => {
+                            if(err) return done(err);
+                            expect(val).to.equal('Habbes');
+                            menu.end();
+                        });
+                    }
+                });
+                
+                args.text = '';
+                menu.run(args, _ => {
+                    expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
+                    args.text = '1';
+                    menu.run(args, _=> {
+                        process.nextTick(_ => {
+                            // expect session to be deleted
+                            expect(session[args.sessionId]).to.not.be.ok;
+                            done();
+                        });
+                        
+                    });
+                });
+
+
+                
+            });
+
+
+        });
+
+    }); 
     
 
 });
