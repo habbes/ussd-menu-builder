@@ -1,6 +1,6 @@
 {
   "name": "ussd-menu-builder",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Easily compose USSD menus using states, compatible with Africastalking API",
   "main": "index.js",
   "scripts": {
@@ -23,11 +23,11 @@
   },
   "homepage": "https://github.com/habbes/ussd-menu-builder",
   "dependencies": {
-    "async": "^2.0.1",
-    "mocha": "^3.0.2",
-    "chai": "^3.5.0"
+    "async": "^2.0.1"
   },
   "devDependencies": {
+    "mocha": "^3.0.2",
+    "chai": "^3.5.0",
     "blanket": "^1.2.3",
     "coveralls": "^2.11.12",
     "mocha-lcov-reporter": "^1.2.0"
