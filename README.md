@@ -453,7 +453,7 @@ menu.sessionConfig({
     get: function(sessionId, key){
         return new Promise((resolve, reject) => {
             let value = sessions[sessionId][key];
-            resolve(session);
+            resolve(value);
         });
     }
 })
@@ -483,7 +483,7 @@ menu.state('otherState', {
         menu.session.get('firstName')
         .then( firstName => {
             // do something with the value
-            console.log(lastName);
+            console.log(firstName);
             ...
             menu.con('Next');
         })
