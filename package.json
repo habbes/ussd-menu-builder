@@ -28,7 +28,6 @@
     "async": "^2.0.1"
   },
   "devDependencies": {
-    "blanket": "git://github.com/alex-seville/blanket.git",
     "chai": "^3.5.0",
     "coveralls": "^2.11.12",
     "istanbul": "^0.4.4",
