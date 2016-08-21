@@ -1,10 +1,12 @@
 {
   "name": "ussd-menu-builder",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Easily compose USSD menus using states, compatible with Africastalking API",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test"
+    "test": "mocha test",
+    "coverage": "istanbul cover node_modules/mocha/bin/_mocha test -- -R spec",
+    "coveralls": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "repository": {
     "type": "git",
@@ -26,10 +28,10 @@
     "async": "^2.0.1"
   },
   "devDependencies": {
-    "mocha": "^3.0.2",
     "chai": "^3.5.0",
-    "blanket": "^1.2.3",
     "coveralls": "^2.11.12",
+    "istanbul": "^0.4.4",
+    "mocha": "^3.0.2",
     "mocha-lcov-reporter": "^1.2.0"
   }
 }
