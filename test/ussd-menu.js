@@ -458,11 +458,13 @@ describe('UssdMenu', function(){
                 menu.sessionConfig(config);
                 menu.startState({
                     run: () => {
-                        menu.session.set('name', 'Habbes').then( _ => {
+                        menu.session.set('name', 'Habbes').then( () => {
                             expect(session[args.sessionId].name).to.equal('Habbes');
                             menu.con('Next');
                         })
-                        .catch(done);
+                        .catch(err => {
+                            done(err);
+                        });
                     },
                     next: {
                         '1': 'state1'
@@ -470,21 +472,24 @@ describe('UssdMenu', function(){
                 });
 
                 menu.state('state1', {
-                    run: _ => {
+                    run: () => {
                         menu.session.get('name').then( val => {
                             expect(val).to.equal('Habbes');
                             menu.end();
                         })
-                        .catch(done);
+                        .catch(err => {
+                            console.log('STATE1 error', err);
+                            done(err);
+                        });
                     }
                 });
 
                 args.text = '';
-                menu.run(args, _ => {
+                menu.run(args, () => {
                     expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
                     args.text = '1';
-                    menu.run(args, _=> {
-                        process.nextTick(_ => {
+                    menu.run(args, () => {
+                        process.nextTick(() => {
                             // expect session to be deleted
                             expect(session[args.sessionId]).to.not.be.ok;
                             done();
@@ -516,7 +521,7 @@ describe('UssdMenu', function(){
                 });
 
                 menu.state('state1', {
-                    run: _ => {
+                    run: () => {
                         menu.session.get('name', (err, val) => {
                             if(err) return done(err);
                             expect(val).to.equal('Habbes');
@@ -526,11 +531,11 @@ describe('UssdMenu', function(){
                 });
 
                 args.text = '';
-                menu.run(args, _ => {
+                menu.run(args, () => {
                     expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
                     args.text = '1';
                     menu.run(args, _=> {
-                        process.nextTick(_ => {
+                        process.nextTick(() => {
                             // expect session to be deleted
                             expect(session[args.sessionId]).to.not.be.ok;
                             done();
@@ -589,7 +594,7 @@ describe('UssdMenu', function(){
                 menu.sessionConfig(config);
                 menu.startState({
                     run: () => {
-                        menu.session.set('name', 'Habbes').then( _ => {
+                        menu.session.set('name', 'Habbes').then( () => {
                             expect(session[args.sessionId].name).to.equal('Habbes');
                             menu.con('Next');
                         })
@@ -601,7 +606,7 @@ describe('UssdMenu', function(){
                 });
 
                 menu.state('state1', {
-                    run: _ => {
+                    run: () => {
                         menu.session.get('name').then( val => {
                             expect(val).to.equal('Habbes');
                             menu.end();
@@ -611,11 +616,11 @@ describe('UssdMenu', function(){
                 });
 
                 args.text = '';
-                menu.run(args, _ => {
+                menu.run(args, () => {
                     expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
                     args.text = '1';
                     menu.run(args, _=> {
-                        process.nextTick(_ => {
+                        process.nextTick(() => {
                             // expect session to be deleted
                             expect(session[args.sessionId]).to.not.be.ok;
                             done();
@@ -647,7 +652,7 @@ describe('UssdMenu', function(){
                 });
 
                 menu.state('state1', {
-                    run: _ => {
+                    run: () => {
                         menu.session.get('name', (err, val) => {
                             if(err) return done(err);
                             expect(val).to.equal('Habbes');
@@ -657,11 +662,11 @@ describe('UssdMenu', function(){
                 });
                 
                 args.text = '';
-                menu.run(args, _ => {
+                menu.run(args, () => {
                     expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
                     args.text = '1';
                     menu.run(args, _=> {
-                        process.nextTick(_ => {
+                        process.nextTick(() => {
                             // expect session to be deleted
                             expect(session[args.sessionId]).to.not.be.ok;
                             done();
@@ -679,5 +684,54 @@ describe('UssdMenu', function(){
 
     }); 
     
+    describe('Error events', function(){
+
+        it('should fail when route cannot be reached', function(done) {
+            menu = new UssdMenu();
+            menu.startState({
+                run: () => {
+                    menu.con('Next');
+                },
+                next: {
+                    '1': 'unknown'
+                }
+            });
+            args.text = '1';
+            menu.on('error', err => {
+                expect(err).to.be.an('error');
+                done();
+            });
+            menu.run(args);
+        });
+
+        it('should fail when run function not defined on matched route', function(done){
+            menu = new UssdMenu();
+            menu.startState({
+                run: () => {
+                    menu.con('Next');
+                },
+                next: {
+                    '1': 'state1'
+                }
+            });
+            menu.state('state1', {});
+            args.text = '1';
+            menu.on('error', err => {
+                expect(err).to.be.an('error');
+                done();
+            });
+            menu.run(args);
+            
+        });
+
+        describe('Session Handler errors', function(){
+            
+            it('', function(done){
+
+            });
+
+        });
+
+    });
 
 });
