@@ -686,7 +686,7 @@ describe('UssdMenu', function(){
     
     describe('Error events', function(){
 
-        it('should fail when route cannot be reached', function(done) {
+        it('should emit error when route cannot be reached', function(done) {
             menu = new UssdMenu();
             menu.startState({
                 run: () => {
@@ -704,7 +704,7 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should fail when run function not defined on matched route', function(done){
+        it('should emit error when run function not defined on matched route', function(done){
             menu = new UssdMenu();
             menu.startState({
                 run: () => {
@@ -726,9 +726,305 @@ describe('UssdMenu', function(){
 
         describe('Session Handler errors', function(){
             
-            it('', function(done){
+            it('should fail when session start handler returns error in callback', function(done){
+                let config = {
+                    start: (sessionId, cb) => {
+                        cb(new Error('start error'));
+                    },
+                };
+                
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('start error');
+                    done();
+                });
+                menu.sessionConfig(config);
+                menu.run(args);
 
             });
+
+            it('should fail when session start handler returns error in promise', function(done){
+                let config = {
+                    start: (sessionId) => {
+                        return new Promise((resolve, reject) => {
+                            return reject(new Error('start error'))
+                        });
+                    },
+                };
+                
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('start error');
+                    done();
+                });
+                menu.sessionConfig(config);
+                menu.run(args);
+
+            });
+
+            it('should fail when session start handler throws error in promise', function(done){
+                let config = {
+                    start: () => {
+                        return new Promise(() => {
+                            throw new Error('start error');
+                        });
+                    },
+                };
+                
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('start error');
+                    done();
+                });
+                menu.sessionConfig(config);
+                menu.run(args);
+
+            });
+
+            it('should fail when set handler returns error in callback', function(done){
+                let config = {
+                    start: (id, cb) => {
+                        cb();
+                    },
+                    set: (sessionId, key, val, cb) => {
+                        cb(new Error('set error'));
+                    },
+                };
+                menu.sessionConfig(config);
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('set error');
+                    done();
+                });
+                
+                menu.startState({
+                    run: () => {
+                        menu.session.set('key', 'value');
+                    }
+                });
+                menu.run(args);
+
+            });
+
+            it('should fail when set handler returns error in promise', function(done){
+                let config = {
+                    start: (id, cb) => {
+                        cb();
+                    },
+                    set: () => {
+                        return new Promise((resolve, reject) => {
+                            reject(new Error('set error'));
+                        });
+                    },
+                };
+                menu.sessionConfig(config);
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('set error');
+                    done();
+                });
+                
+                menu.startState({
+                    run: () => {
+                        menu.session.set('key', 'value');
+                    }
+                });
+                menu.run(args);
+
+            });
+
+            it('should fail when set handler throws error in promise', function(done){
+                let config = {
+                    start: (id, cb) => {
+                        cb();
+                    },
+                    set: () => {
+                        return new Promise(() => {
+                            throw new Error('set error');
+                        });
+                    },
+                };
+                menu.sessionConfig(config);
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('set error');
+                    done();
+                });
+                
+                menu.startState({
+                    run: () => {
+                        menu.session.set('key', 'value');
+                    }
+                });
+                menu.run(args);
+
+            });
+
+            it('should fail when get handler returns error in callback', function(done){
+                let config = {
+                    start: (id, cb) => {
+                        cb();
+                    },
+                    get: (sessionId, key, cb) => {
+                        cb(new Error('set error'));
+                    },
+                };
+                menu.sessionConfig(config);
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('set error');
+                    done();
+                });
+                
+                menu.startState({
+                    run: () => {
+                        menu.session.get('key');
+                    }
+                });
+                menu.run(args);
+
+            });
+
+
+            it('should fail when get handler returns error in promise', function(done){
+                let config = {
+                    start: (id, cb) => {
+                        cb();
+                    },
+                    get: () => {
+                        return new Promise( (resolve, reject) => {
+                            return reject(new Error('set error'));
+                        });
+                    },
+                };
+                menu.sessionConfig(config);
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('set error');
+                    done();
+                });
+                
+                menu.startState({
+                    run: () => {
+                        menu.session.get('key');
+                    }
+                });
+                menu.run(args);
+
+            });
+
+
+            it('should fail when get handler throws error in promise', function(done){
+                let config = {
+                    start: (id, cb) => {
+                        cb();
+                    },
+                    get: () => {
+                        return new Promise( () => {
+                            throw new Error('set error');
+                        });
+                    },
+                };
+                menu.sessionConfig(config);
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('set error');
+                    done();
+                });
+                
+                menu.startState({
+                    run: () => {
+                        menu.session.get('key');
+                    }
+                });
+                menu.run(args);
+
+            });
+
+
+            it('should fail when session end handler returns error in callback', function(done){
+                let config = {
+                    start: (id, cb) => {
+                        cb();
+                    },
+                    end: (id, cb) => {
+                        cb(new Error('end error'));
+                    }
+                };
+                
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('end error');
+                    done();
+                });
+                menu.sessionConfig(config);
+                menu.startState({
+                    run: () => {
+                        menu.end();
+                    }
+                });
+                menu.run(args);
+
+            });
+
+            it('should fail when session end handler returns error in promise', function(done){
+                let config = {
+                    start: (id, cb) => {
+                        cb();
+                    },
+                    end: () => {
+                        return new Promise((resolve, reject) => {
+                            return reject(new Error('end error'));
+                        });
+                    }
+                };
+                
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('end error');
+                    done();
+                });
+                menu.sessionConfig(config);
+                menu.startState({
+                    run: () => {
+                        menu.end();
+                    }
+                });
+                menu.run(args);
+
+            });
+
+
+            it('should fail when session end handler throws error in promise', function(done){
+                let config = {
+                    start: (id, cb) => {
+                        cb();
+                    },
+                    end: () => {
+                        return new Promise(() => {
+                            throw new Error('end error');
+                        });
+                    }
+                };
+                
+                menu.on('error', err => {
+                    expect(err).to.be.an('error');
+                    expect(err.message).to.equal('end error');
+                    done();
+                });
+                menu.sessionConfig(config);
+                menu.startState({
+                    run: () => {
+                        menu.end();
+                    }
+                });
+                menu.run(args);
+
+            });
+
+            
+
+
 
         });
 
