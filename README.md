@@ -1,6 +1,6 @@
 # ussd-menu-builder
 
-[![Build Status](https://travis-ci.org/habbes/ussd-menu-builder.svg?branch=master)](https://travis-ci.org/habbes/ussd-menu-builder.svg?branch=master)
+[![Build Status](https://travis-ci.org/habbes/ussd-menu-builder.svg?branch=master)](https://travis-ci.org/habbes/ussd-menu-builder)
 [![Coverage Status](https://coveralls.io/repos/github/habbes/ussd-menu-builder/badge.svg?branch=master)](https://coveralls.io/github/habbes/ussd-menu-builder?branch=master)
 
 
