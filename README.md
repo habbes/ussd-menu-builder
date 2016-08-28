@@ -469,10 +469,10 @@ And then to add and retrieve data inside states, use the
 ```javascript
 
 menu.state('someState', {
-    run: _ => {
+    run: () => {
         let firstName = menu.val;
         menu.session.set('firstName', firstName)
-        .then( _ => {
+        .then( () => {
             menu.con('Enter your last name');
         })
     }
@@ -480,7 +480,7 @@ menu.state('someState', {
 })
 ...
 menu.state('otherState', {
-    run: _ => {
+    run: () => {
         menu.session.get('firstName')
         .then( firstName => {
             // do something with the value
@@ -513,3 +513,59 @@ access your storage driver directly if you prefer. However if you
 do configure a handler using the above method then you should provide
 implementations for all the 4 methods as shown above..
 ***
+
+## Errors
+
+`UssdMenu` instances emit an **`error` event** when an error occurs during the
+state resolution process (e.g: **"state not found"** or **"run function not defined"**).
+
+```javascript
+
+menu.startState({
+    ...
+    next: {
+        '1': 'nonExistentState'
+    }
+});
+
+menu.on('error', (err) => {
+    // handle errors
+    console.log('Error', err);
+});
+
+
+args.text = '1';
+menu.run(args);
+
+```
+
+In addition, errors passed to the callback of the session handler's methods or 
+rejected by their promises will also trigger the `error` event for convenience
+so that you can handle your handle errors in one place.
+
+```javascript
+
+menu.sessionConfig({
+    ...
+    get: (sessionId, key, callback){
+        callback(new Error('error'));
+    }
+});
+
+menu.on('error', err => {
+    // handle errors
+    console.log(err);
+});
+
+...
+
+menu.state('someState', {
+    run: () => {
+        menu.session.get('key').then(val => {
+            ...
+        });
+        // you don't have to catch the error here
+    }
+});
+
+```
