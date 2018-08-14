@@ -1,8 +1,9 @@
 {
   "name": "ussd-menu-builder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Easily compose USSD menus using states, compatible with Africastalking API",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "mocha test",
     "coverage": "istanbul cover node_modules/mocha/bin/_mocha test -- -R spec",
