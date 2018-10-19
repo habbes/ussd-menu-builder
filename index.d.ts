@@ -23,9 +23,10 @@ declare class UssdState {
 }
 
 declare class UssdMenu extends EventEmitter {
-    constructor();
+    constructor(opts?: UssdMenu.UssdMenuOptions);
 
     session: any;
+    provider: UssdMenu.UssdMenuOptions.provider;
     args: UssdMenu.UssdGatewayArgs;
     states: Array<UssdState>;
     result: string;
@@ -37,11 +38,15 @@ declare class UssdMenu extends EventEmitter {
 
     end(text: string): void;
 
+    getRoute(args: UssdMenu.UssdGatewayArgs | UssdMenu.HubtelArgs): Promise<string>;
+
     go(state: string): void;
 
     goStart(): void;
 
-    onResult?(result: string): void;
+    mapArgs(args: UssdMenu.UssdGatewayArgs | UssdMenu.HubtelArgs): UssdMenu.UssdGatewayArgs;
+
+    onResult?(result: string | UssdMenu.HubtelResponse): void;
 
     resolveRoute(route: string, callback: Function): void;
 
@@ -73,6 +78,26 @@ declare namespace UssdMenu {
         phoneNumber: string;
         sessionId: string;
         serviceCode: string;
+    }
+
+    interface HubtelResponse {
+        Type: 'Response' | 'Release';
+        Message: string;
+    }
+
+    interface HubtelArgs {
+        Mobile: string;
+        SessionId: string;
+        ServiceCode: string;
+        Type: 'Initiation' | 'Response' | 'Release' | 'Timeout';
+        Message: string;
+        Operator: 'Tigo' | 'Airtel' | 'MTN' | 'Vodafone' | 'Safaricom';
+        Sequence: number;
+        ClientState?: any;
+    }
+
+    interface UssdMenuOptions {
+        provider?: 'africasTalking' | 'hubtel';
     }
     
     interface UssdStateOptions {
