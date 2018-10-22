@@ -17,7 +17,8 @@
     "ussd-menu-builder",
     "ussd",
     "africastalking",
-    "ussd-menu"
+    "ussd-menu",
+    "hubtel"
   ],
   "author": "Habbes <hello@habbes.xyz>",
   "license": "MIT",
