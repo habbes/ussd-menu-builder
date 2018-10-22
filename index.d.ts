@@ -26,7 +26,7 @@ declare class UssdMenu extends EventEmitter {
     constructor(opts?: UssdMenu.UssdMenuOptions);
 
     session: any;
-    provider: UssdMenu.UssdMenuOptions.provider;
+    provider: UssdMenu.UssdMenuProvider;
     args: UssdMenu.UssdGatewayArgs;
     states: Array<UssdState>;
     result: string;
