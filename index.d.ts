@@ -96,8 +96,9 @@ declare namespace UssdMenu {
         ClientState?: any;
     }
 
+    type UssdMenuProvider = 'africasTalking' | 'hubtel';
     interface UssdMenuOptions {
-        provider?: 'africasTalking' | 'hubtel';
+        provider?: UssdMenuProvider;
     }
     
     interface UssdStateOptions {
