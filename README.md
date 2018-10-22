@@ -4,15 +4,17 @@
 [![Coverage Status](https://coveralls.io/repos/github/habbes/ussd-menu-builder/badge.svg?branch=master)](https://coveralls.io/github/habbes/ussd-menu-builder?branch=master)
 
 
-Easily compose USSD menus in Node.Js, compatible with 
-[Africastalking API](https://africastalking.com).
-
-# QuikStart
+Easily compose USSD menus in Node.js, compatible with
+[Africastalking API](https://africastalking.com) or [Hubtel API](https://developers.hubtel.com/reference#ussd).
 
 ## Installation
 
 ```
 $ npm install ussd-menu-builder
+```
+or
+```
+$ yarn add ussd-menu-builder
 ```
 
 ## Features
@@ -568,4 +570,32 @@ menu.state('someState', {
     }
 });
 
+```
+
+## Hubtel Support
+
+As of version 1.1.0, ussd-menu-builder has added support for Hubtel's USSD API by providing the `provider` option when creating the **UssdMenu** object. There are no changes to the way states are defined, and the HTTP request parameters sent by Hubtel are mapped as usual to `menu.args`, and the result of `menu.run` is mapped to the HTTP response object expected by Hubtel (`menu.con` returns a _Type: Respons & `menu.end` returns a Type: Release). The additional HTTP request parameters like Operator, ClientState, and Sequence are not used.
+
+The key difference with Hubtel is that the service only sends the most recent response message, rather than the full route string. The library handles that using the Sessions feature, which requires that a SessionConfig is defined in order to store the session's full route. This is stored in the key `route`, so if you use that key in your application it could cause issues.
+
+
+### Example
+
+```javascript
+menu = new UssdMenu({ provider: 'hubtel' });
+// Define Session Config & States normally
+menu.sessionConfig({ ... });
+menu.state('thisState', {
+    run: function(){
+        ...
+    });
+});
+
+app.post('/ussdHubtel', (req, res) => {
+    menu.run(req.body, resMsg => {
+        // resMsg would return an object like:
+        // { "Type": "Response", "Message": "Some Response" }
+        res.json(resMsg);
+    });
+})
 ```

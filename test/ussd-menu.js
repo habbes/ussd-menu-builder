@@ -15,7 +15,7 @@ describe('UssdMenu', function(){
     });
 
     describe('States', function(){
-    
+
         it('should create start state', function(){
             menu.startState({
                 run: function(){
@@ -1230,9 +1230,296 @@ describe('UssdMenu', function(){
             });
 
             
+        });
 
+    });
 
+    describe('Hubtel Support', function() {
+        let menu;
+        let session = {};
+        let args;
 
+        let config = {
+            start: (id) => {
+                return new Promise((resolve, reject) => {
+                    if(!(id in session)) session[id] = {};
+                    return resolve();
+                });
+            },
+            end: (id) => {
+                return new Promise((resolve, reject) => {
+                    delete session[id];
+                    return resolve();
+                });
+            },
+            get: (id, key) => {
+                return new Promise((resolve, reject) => {
+                    let val = session[id][key];
+                    return resolve(val);
+                });
+            },
+            set: (id, key, val) => {
+                return new Promise((resolve, reject) => {
+                    session[id][key] = val;
+                    return resolve();
+                });
+            }
+        };
+
+        beforeEach(function(){
+            menu = new UssdMenu({ provider: 'hubtel' });
+            session = {};
+            args = {
+                Mobile: '233208183783',
+                SessionId: 'bd7bc392496b4b28af2033ba83f5e400',
+                ServiceCode: '713*4',
+                Type: 'Response',
+                Message: '',
+                Operator: 'MTN',
+                Sequence: 2
+            };
+        });
+
+        it('should emit error when invalid provider in menu config', function(done) {
+            try {
+                menu = new UssdMenu({ provider: 'otherTelco' });
+            } catch (err) {
+                expect(err).to.be.an('error');
+                done();
+            }
+        });
+
+        it('should emit error when session config not set up', function(done) {
+            menu = new UssdMenu({ provider: 'hubtel' });
+            menu.startState({
+                run: () => {
+                    menu.con('Next');
+                }
+            });
+            menu.on('error', err => {
+                expect(err).to.be.an('error');
+                expect(err.message).to.equal('Session config required for Hubtel provider');
+                done();
+            });
+            menu.run(args);
+        });
+
+        it('should emit error if unable to map route', function(done){
+            menu = new UssdMenu({ provider: 'hubtel' });
+            args.Message = '1';
+            args.Type = 'Initiation';
+
+            let config = {
+                start: (id, cb) => {
+                    cb();
+                },
+                get: (id, key) => {
+                    return new Promise((resolve, reject) => {
+                        let val = session[id][key];
+                        return resolve(val);
+                    });
+                },
+                set: (id, key, val) => {
+                    return new Promise((resolve, reject) => {
+                        if (key === 'route') {
+                            return reject('Cannot set route key');
+                        } else {
+                            session[id][key] = val;
+                            return resolve();
+                        }
+                    });
+                },
+                end: () => {
+                    return new Promise((resolve, reject) => {
+                        return reject(new Error('end error'));
+                    });
+                }
+            };
+
+            menu.sessionConfig(config);
+            menu.startState({
+                run: () => {
+                    menu.con('Next');
+                },
+                next: {
+                    '1': 'state1'
+                }
+            });
+            menu.on('error', err => {
+                expect(err).to.be.an('error');
+                expect(err.message).to.equal('Cannot set route key');
+                done();
+            });
+
+            menu.run(args);
+
+        });
+
+        it('should map incoming hubtel request to menu.args', function(done) {
+            menu.sessionConfig(config);
+
+            args.Message = '1';
+            menu.startState({
+                next: {
+                    '1': 'state1'
+                }
+            });
+            menu.state('state1', {
+                run: function(state){
+                    expect(state.menu.args.phoneNumber).to.equal(`+${args.Mobile}`);
+                    expect(state.menu.args.sessionId).to.equal(args.SessionId);
+                    expect(state.menu.args.serviceCode).to.equal(args.ServiceCode);
+                    expect(state.menu.args.text).to.equal(args.Message);
+                    expect(state.val).to.equal(args.Message);
+                    expect(menu.val).to.equal(args.Message);
+                    done();
+                }
+            });
+
+            menu.run(args);
+        });
+        it('should override message from Initiation call with empty string', function(done) {
+            menu.sessionConfig(config);
+            const initArgs = Object.assign(args, {
+                Sequence: 1,
+                Message: '*713*4#',
+                Type: 'Initiation',
+            });
+
+            menu.startState({
+                run: function(state) {
+                    expect(menu.val).to.equal('');
+                    expect(state.menu.args.text).to.equal('');
+                    done();
+                }
+            });
+
+            menu.run(initArgs);
+        });
+
+        it('should return Response object from menu.con', function(done) {
+            menu.sessionConfig(config);
+            menu.startState({
+                run: () => {
+                    menu.con('Next');
+                },
+            });
+
+            menu.run(args, res => {
+                expect(res).to.be.an('object');
+                expect(res.Message).to.equal('Next');
+                expect(res.Type).to.equal('Response');
+                done();
+            });
+        });
+
+        it('should return Release object from menu.end', function(done) {
+            menu.sessionConfig(config);
+            menu.startState({
+                run: () => {
+                    menu.end('End');
+                },
+            });
+
+            menu.run(args, res => {
+                expect(res).to.be.an('object');
+                expect(res.Message).to.equal('End');
+                expect(res.Type).to.equal('Release');
+                done();
+            });
+        });
+
+        it('should be able to map first text to route', function(done) {
+            menu.sessionConfig(config);
+
+            const testResponse = 'state1 response';
+
+            menu.startState({
+                run: () => {
+                    menu.con('Next');
+                },
+                next: {
+                    '1': 'state1'
+                }
+            });
+            menu.state('state1', {
+                run: () => {
+                    menu.con(testResponse);
+                }
+            });
+
+            menu.run(args, () => {
+                expect(session[args.SessionId].route).to.equal('');
+                args.Message = '1';
+                menu.run(args, res => {
+                    process.nextTick(() => {
+                        // expect session to be deleted
+                        expect(res.Message).to.equal(testResponse);
+                        expect(session[args.SessionId].route).to.equal(args.Message);
+                        done();
+                    });
+                });
+            });
+        });
+        it('should be able to map text after first sequence to route', function(done) {
+            menu.sessionConfig(config);
+
+            const initArgs = Object.assign({}, args, {
+                Sequence: 1,
+                Message: '*713*4#',
+                Type: 'Initiation',
+            });
+            const firstResponseArgs = Object.assign({}, args, {
+                Sequence: 2,
+                Message: '1',
+            });
+            const secondResponseArgs = Object.assign({}, args, {
+                Sequence: 3,
+                Message: '3',
+            });
+
+            const testResponse = 'state1 response';
+            const test2Response = 'state2 response';
+
+            menu.startState({
+                run: () => {
+                    menu.con('Next');
+                },
+                next: {
+                    '1': 'state1'
+                }
+            });
+            menu.state('state1', {
+                run: () => {
+                    menu.con(testResponse);
+                },
+                next: {
+                    '3': 'state2'
+                }
+            });
+
+            menu.state('state2', {
+                run: () => {
+                    menu.end(test2Response);
+                }
+            });
+
+            menu.run(initArgs, initResponse => {
+                expect(session[args.SessionId].route).to.equal('');
+                expect(initResponse.Message).to.equal('Next');
+                expect(initResponse.Type).to.equal('Response');
+                menu.run(firstResponseArgs, res => {
+                    // expect session to be deleted
+                    expect(res.Message).to.equal(testResponse);
+                    expect(res.Type).to.equal('Response');
+                    menu.run(secondResponseArgs, res2 => {
+                        expect(res2.Message).to.equal(test2Response);
+                        expect(res2.Type).to.equal('Release');
+                        expect(session[args.SessionId].route).to.equal('1*3');
+                        done();
+                    });
+                });
+            });
         });
 
     });
