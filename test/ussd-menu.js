@@ -1378,7 +1378,7 @@ describe('UssdMenu', function () {
 
             menu.run(args);
         });
-        it('should override message from Initiation call with empty string', function (done) {
+        it('should override message from Initiation call with empty string if no extra params', function(done) {
             menu.sessionConfig(config);
             const initArgs = Object.assign(args, {
                 Sequence: 1,
@@ -1397,7 +1397,51 @@ describe('UssdMenu', function () {
             menu.run(initArgs);
         });
 
-        it('should return Response object from menu.con', function (done) {
+        it('should map Message from Initiation call to a route if extra params', function(done) {
+            menu.sessionConfig(config);
+            const initArgs = Object.assign(args, {
+                Sequence: 1,
+                Message: '*713*4*3*5#',
+                Type: 'Initiation',
+            });
+
+            menu.startState({
+                run: function(state){
+                    // Should not reach this function
+                    expect(10).to.equal(20);
+                },
+                next: {
+                    '3': 'state1'
+                }
+            });
+            menu.state('state1', {
+                run: function(state){
+                    // Should not reach this function
+                    expect(15).to.equal(5);
+                },
+                next: {
+                    '5': 'state2'
+                }
+            });
+
+            menu.state('state2', {
+                run: function(state){
+                    expect(state.menu.args.phoneNumber).to.equal(`+${args.Mobile}`);
+                    expect(state.menu.args.sessionId).to.equal(args.SessionId);
+                    expect(state.menu.args.serviceCode).to.equal(args.ServiceCode);
+                    expect(state.menu.args.text).to.equal('3*5');
+                    done();
+                },
+                next: {
+                    // Should not reach here
+                    '*\\d+': 'state1'
+                }
+            });
+
+            menu.run(initArgs);
+        });
+
+        it('should return Response object from menu.con', function(done) {
             menu.sessionConfig(config);
             menu.startState({
                 run: () => {
