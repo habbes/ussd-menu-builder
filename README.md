@@ -106,7 +106,7 @@ const menu = new UssdMenu();
 The **```menu.run(args, resultCallback)```** goes through the menu and finds
 the appropriate state to run based on the user input.
 
-Thar **```args```** object should contain the following keys coming from
+The **```args```** object should contain the following keys coming from
 the  [Africastalking API](https://africastalking.com):
 
 - **`sessionId`**: unique session ID that persists through the entire USSD session,
@@ -120,6 +120,12 @@ This is parsed by the ```UssdMenu``` to find the appropriate state to run at eac
 
 After the matched state runs, the resultCallback is called with the response from the state.
 
+**`Note: `** *The menu also returns a promise that can be resolved if you need to do anything with the final response.
+for example:*
+```javascript
+let resp = await menu.run(args) // resultCallback is not necessarry if you intend to run the menu in an async function
+
+```
 Here's an example registering a handler with the [express](https://expressjs.com) framework:
 ```javascript
 
@@ -133,6 +139,22 @@ app.post('/ussd', (req, res) => {
     menu.run(args, resMsg => {
         res.send(resMsg);
     });
+})
+
+```
+
+Handling menu.run response:
+```javascript
+
+app.post('/ussd', async (req, res) => {
+    let args = {
+        phoneNumber: req.body.phoneNumber,
+        sessionId: req.body.sessionId,
+        serviceCode: req.body.serviceCode,
+        text: req.body.text
+    };
+    let resMsg = await menu.run(args);
+    res.send(resMsg);
 })
 
 ```

@@ -2,7 +2,7 @@
 const expect = require('chai').expect;
 const UssdMenu = require('../lib/ussd-menu');
 
-describe('UssdMenu', function(){
+describe('UssdMenu', function () {
     let menu,
         args = {
             phoneNumber: '+2547123456789',
@@ -10,15 +10,15 @@ describe('UssdMenu', function(){
             sessionId: 'sfdsfdsafdsf',
             text: ''
         };
-    beforeEach(function(){
+    beforeEach(function () {
         menu = new UssdMenu();
     });
 
-    describe('States', function(){
+    describe('States', function () {
 
-        it('should create start state', function(){
+        it('should create start state', function () {
             menu.startState({
-                run: function(){
+                run: function () {
                     menu.con('1. Next');
                 },
                 next: {
@@ -33,9 +33,9 @@ describe('UssdMenu', function(){
             expect(state.run).to.be.a('function');
         });
 
-        it('should create states', function(){
+        it('should create states', function () {
             menu.state('state1', {
-                run: function(){
+                run: function () {
                     menu.con('1. State 2');
                 },
                 next: {
@@ -44,7 +44,7 @@ describe('UssdMenu', function(){
             });
 
             menu.state('state2', {
-                run: function(){
+                run: function () {
                     menu.end('End.');
                 }
             });
@@ -61,12 +61,12 @@ describe('UssdMenu', function(){
         });
     });
 
-    describe('State Resolution', function(){
-        
-        it('should run the start state if no empty rule exists', function(done){
+    describe('State Resolution', function () {
+
+        it('should run the start state if no empty rule exists', function (done) {
             args.text = '';
             menu.startState({
-                run: function(){
+                run: function () {
                     done();
                 },
                 next: {
@@ -77,11 +77,11 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should follow the empty rule on the start state if declared', function(done){
-            
+        it('should follow the empty rule on the start state if declared', function (done) {
+
             args.text = '';
             menu.startState({
-                run: function(){
+                run: function () {
                     done('Error: start state called');
                 },
                 next: {
@@ -90,7 +90,7 @@ describe('UssdMenu', function(){
             });
 
             menu.state('state1', {
-                run: function(){
+                run: function () {
                     done();
                 }
             });
@@ -98,8 +98,8 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should pass the state to the run function', function(done){
-            
+        it('should pass the state to the run function', function (done) {
+
             args.text = '1';
             menu.startState({
                 next: {
@@ -107,11 +107,11 @@ describe('UssdMenu', function(){
                 }
             });
             menu.state('state1', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('1');
                     expect(menu.val).to.equal('1');
                     expect(state.menu).to.equal(menu);
-                    expect(state.menu.args).to.deep.equal(args);                    
+                    expect(state.menu.args).to.deep.equal(args);
                     done();
                 }
             });
@@ -119,8 +119,8 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should resolve simple string rules', function(done){
-            
+        it('should resolve simple string rules', function (done) {
+
             args.text = '1*4';
             menu.startState({
                 next: {
@@ -135,7 +135,7 @@ describe('UssdMenu', function(){
             });
 
             menu.state('state1.4', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('4');
                     done();
                 }
@@ -144,8 +144,8 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should resolve regex rules when starting with *', function(done){
-            
+        it('should resolve regex rules when starting with *', function (done) {
+
             args.text = '1*James';
             menu.startState({
                 next: {
@@ -155,12 +155,12 @@ describe('UssdMenu', function(){
 
             menu.state('state1', {
                 next: {
-                    '*\\w+' : 'state1.name'
+                    '*\\w+': 'state1.name'
                 }
             });
 
             menu.state('state1.name', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('James');
                     done();
                 }
@@ -169,8 +169,8 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should resolve regex first if declared before conflicting rule', function(done){
-            
+        it('should resolve regex first if declared before conflicting rule', function (done) {
+
             args.text = 'input';
             menu.startState({
                 next: {
@@ -180,14 +180,14 @@ describe('UssdMenu', function(){
             });
 
             menu.state('state1', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('input');
                     done();
                 }
             });
 
             menu.state('state2', {
-                run: function(state){
+                run: function (state) {
                     done('state2 not supposed to be called');
                 }
             });
@@ -195,8 +195,8 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should not resolve regex first if declared after conflicting rule', function(done){
-            
+        it('should not resolve regex first if declared after conflicting rule', function (done) {
+
             args.text = 'rule';
             menu.startState({
                 next: {
@@ -206,14 +206,14 @@ describe('UssdMenu', function(){
             });
 
             menu.state('state1', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('rule');
                     done();
                 }
             });
 
             menu.state('state2', {
-                run: function(state){
+                run: function (state) {
                     done('state2 not supposed to be called');
                 }
             });
@@ -221,19 +221,19 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should successfully resolve state based on sync function', function(done){
-            
+        it('should successfully resolve state based on sync function', function (done) {
+
             args.text = '1';
             menu.startState({
                 next: {
-                    '1': function(){
+                    '1': function () {
                         return 'state1';
                     }
                 }
             });
 
             menu.state('state1', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('1');
                     done();
                 }
@@ -242,19 +242,19 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should successfully resolve state based on async function using callback', function(done){
-            
+        it('should successfully resolve state based on async function using callback', function (done) {
+
             args.text = '1';
             menu.startState({
                 next: {
-                    '1': function(callback){
+                    '1': function (callback) {
                         return callback('state1');
                     }
                 }
             });
 
             menu.state('state1', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('1');
                     done();
                 }
@@ -263,21 +263,21 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should successfully resolve state based on async function using promise', function(done){
-            
+        it('should successfully resolve state based on async function using promise', function (done) {
+
             args.text = '1';
             menu.startState({
                 next: {
-                    '1': function(){
-                       return new Promise((resolve, reject) => {
-                           return resolve('state1');
-                       });
+                    '1': function () {
+                        return new Promise((resolve, reject) => {
+                            return resolve('state1');
+                        });
                     }
                 }
             });
 
             menu.state('state1', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('1');
                     done();
                 }
@@ -286,7 +286,7 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should fall back to declared default if link not found', function(done){
+        it('should fall back to declared default if link not found', function (done) {
             args.text = '1*invalid';
             menu.startState({
                 next: {
@@ -299,12 +299,12 @@ describe('UssdMenu', function(){
                     '1': 'state1.1',
                     '2': 'state1.2',
                 },
-                
+
                 defaultNext: 'state1.default'
             });
 
             menu.state('state1.default', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('invalid');
                     done();
                 }
@@ -313,7 +313,7 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        if('should use same state as default if no default is declared', function(done){
+        if ('should use same state as default if no default is declared', function (done) {
             args.text = '1*invalid';
             menu.startState({
                 next: {
@@ -322,7 +322,7 @@ describe('UssdMenu', function(){
             });
 
             menu.state('state1', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('invalid');
                     done();
                 },
@@ -333,7 +333,7 @@ describe('UssdMenu', function(){
             });
         });
 
-        it('should redirect to a different state using the go method', function(done){
+        it('should redirect to a different state using the go method', function (done) {
             args.text = '1';
             menu.startState({
                 next: {
@@ -342,12 +342,12 @@ describe('UssdMenu', function(){
                 }
             });
             menu.state('state1', {
-                run: function(state){
+                run: function (state) {
                     menu.go('state2');
                 }
             });
             menu.state('state2', {
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('1'); //retains the val of the referring state
                     expect(menu.val).to.equal('1');
                     done();
@@ -357,10 +357,10 @@ describe('UssdMenu', function(){
 
         });
 
-        it('should redirect to the start state using goStart method', function(done){
-             args.text = '1';
+        it('should redirect to the start state using goStart method', function (done) {
+            args.text = '1';
             menu.startState({
-                run: function(state){
+                run: function (state) {
                     expect(state.val).to.equal('1');
                     expect(menu.val).to.equal('1');
                     done();
@@ -371,7 +371,7 @@ describe('UssdMenu', function(){
                 }
             });
             menu.state('state1', {
-                run: function(state){
+                run: function (state) {
                     menu.goStart();
                 }
             });
@@ -381,39 +381,39 @@ describe('UssdMenu', function(){
 
     });
 
-    
 
-    describe('Response', function(){
+
+    describe('Response', function () {
         let args = {
             phoneNumber: '+254123456789',
             serviceCode: '111',
             sessionId: 'dsfsfsdfsd',
             text: ''
         };
-        it('should successfully return a CON response', function(done){
-            
+        it('should successfully return a CON response', function (done) {
+
             let message = 'Choose option';
             menu.startState({
-                run: function(){
+                run: function () {
                     menu.con(message);
                 }
             });
 
-            menu.run(args, function(res){
+            menu.run(args, function (res) {
                 expect(res).to.equal('CON ' + message);
                 done();
-            });            
+            });
         });
 
-        it('should successfully return an END response', function(done){
-            
+        it('should successfully return an END response', function (done) {
+
             let message = 'Thank you';
             menu.startState({
-                run: function(){
+                run: function () {
                     menu.end(message);
                 }
             });
-            menu.run(args, function(res){
+            menu.run(args, function (res) {
                 expect(res).to.equal('END ' + message);
                 done();
             });
@@ -422,9 +422,9 @@ describe('UssdMenu', function(){
     });
 
 
-    describe('Sessions', function(){       
-        
-        describe('Callback-based config', function(){
+    describe('Sessions', function () {
+
+        describe('Callback-based config', function () {
             let menu;
             let session;
             let args = {
@@ -434,7 +434,7 @@ describe('UssdMenu', function(){
             };
             let config = {
                 start: (id, cb) => {
-                    if(!(id in session)) session[id] = {};
+                    if (!(id in session)) session[id] = {};
                     cb();
                 },
                 end: (id, cb) => {
@@ -452,19 +452,19 @@ describe('UssdMenu', function(){
             };
 
 
-            it('should manage session using promises', function(done){
+            it('should manage session using promises', function (done) {
                 session = {};
                 menu = new UssdMenu();
                 menu.sessionConfig(config);
                 menu.startState({
                     run: () => {
-                        menu.session.set('name', 'Habbes').then( () => {
+                        menu.session.set('name', 'Habbes').then(() => {
                             expect(session[args.sessionId].name).to.equal('Habbes');
                             menu.con('Next');
                         })
-                        .catch(err => {
-                            done(err);
-                        });
+                            .catch(err => {
+                                done(err);
+                            });
                     },
                     next: {
                         '1': 'state1'
@@ -473,20 +473,20 @@ describe('UssdMenu', function(){
 
                 menu.state('state1', {
                     run: () => {
-                        menu.session.get('name').then( val => {
+                        menu.session.get('name').then(val => {
                             expect(val).to.equal('Habbes');
                             menu.end();
                         })
-                        .catch(err => {
-                            console.log('STATE1 error', err);
-                            done(err);
-                        });
+                            .catch(err => {
+                                console.log('STATE1 error', err);
+                                done(err);
+                            });
                     }
                 });
 
                 args.text = '';
                 menu.run(args, () => {
-                    expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
+                    expect(session[args.sessionId]).to.deep.equal({ name: 'Habbes' });
                     args.text = '1';
                     menu.run(args, () => {
                         process.nextTick(() => {
@@ -494,23 +494,23 @@ describe('UssdMenu', function(){
                             expect(session[args.sessionId]).to.not.be.ok;
                             done();
                         });
-                        
+
                     });
                 });
 
 
-                
+
             });
 
 
-            it('should manage session using callbacks', function(done){
+            it('should manage session using callbacks', function (done) {
                 session = {};
                 menu = new UssdMenu();
                 menu.sessionConfig(config);
                 menu.startState({
                     run: () => {
                         menu.session.set('name', 'Habbes', err => {
-                            if(err) return done(err);
+                            if (err) return done(err);
                             expect(session[args.sessionId].name).to.equal('Habbes');
                             menu.con('Next');
                         });
@@ -523,7 +523,7 @@ describe('UssdMenu', function(){
                 menu.state('state1', {
                     run: () => {
                         menu.session.get('name', (err, val) => {
-                            if(err) return done(err);
+                            if (err) return done(err);
                             expect(val).to.equal('Habbes');
                             menu.end();
                         });
@@ -532,27 +532,27 @@ describe('UssdMenu', function(){
 
                 args.text = '';
                 menu.run(args, () => {
-                    expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
+                    expect(session[args.sessionId]).to.deep.equal({ name: 'Habbes' });
                     args.text = '1';
-                    menu.run(args, _=> {
+                    menu.run(args, _ => {
                         process.nextTick(() => {
                             // expect session to be deleted
                             expect(session[args.sessionId]).to.not.be.ok;
                             done();
                         });
-                        
+
                     });
                 });
 
 
-                
+
             });
 
 
         });
 
 
-        describe('Promise-based config', function(){
+        describe('Promise-based config', function () {
             let menu;
             let session;
             let args = {
@@ -563,7 +563,7 @@ describe('UssdMenu', function(){
             let config = {
                 start: (id) => {
                     return new Promise((resolve, reject) => {
-                        if(!(id in session)) session[id] = {};
+                        if (!(id in session)) session[id] = {};
                         return resolve();
                     });
                 },
@@ -588,17 +588,17 @@ describe('UssdMenu', function(){
             };
 
 
-            it('should manage session using promises', function(done){
+            it('should manage session using promises', function (done) {
                 session = {};
                 menu = new UssdMenu();
                 menu.sessionConfig(config);
                 menu.startState({
                     run: () => {
-                        menu.session.set('name', 'Habbes').then( () => {
+                        menu.session.set('name', 'Habbes').then(() => {
                             expect(session[args.sessionId].name).to.equal('Habbes');
                             menu.con('Next');
                         })
-                        .catch(done);
+                            .catch(done);
                     },
                     next: {
                         '1': 'state1'
@@ -607,41 +607,41 @@ describe('UssdMenu', function(){
 
                 menu.state('state1', {
                     run: () => {
-                        menu.session.get('name').then( val => {
+                        menu.session.get('name').then(val => {
                             expect(val).to.equal('Habbes');
                             menu.end();
                         })
-                        .catch(done);
+                            .catch(done);
                     }
                 });
 
                 args.text = '';
                 menu.run(args, () => {
-                    expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
+                    expect(session[args.sessionId]).to.deep.equal({ name: 'Habbes' });
                     args.text = '1';
-                    menu.run(args, _=> {
+                    menu.run(args, _ => {
                         process.nextTick(() => {
                             // expect session to be deleted
                             expect(session[args.sessionId]).to.not.be.ok;
                             done();
                         });
-                        
+
                     });
                 });
 
 
-                
+
             });
 
 
-            it('should manage session using callbacks', function(done){
+            it('should manage session using callbacks', function (done) {
                 session = {};
                 menu = new UssdMenu();
                 menu.sessionConfig(config);
                 menu.startState({
                     run: () => {
                         menu.session.set('name', 'Habbes', err => {
-                            if(err) return done(err);
+                            if (err) return done(err);
                             expect(session[args.sessionId].name).to.equal('Habbes');
                             menu.con('Next');
                         });
@@ -654,39 +654,39 @@ describe('UssdMenu', function(){
                 menu.state('state1', {
                     run: () => {
                         menu.session.get('name', (err, val) => {
-                            if(err) return done(err);
+                            if (err) return done(err);
                             expect(val).to.equal('Habbes');
                             menu.end();
                         });
                     }
                 });
-                
+
                 args.text = '';
                 menu.run(args, () => {
-                    expect(session[args.sessionId]).to.deep.equal({name: 'Habbes'});
+                    expect(session[args.sessionId]).to.deep.equal({ name: 'Habbes' });
                     args.text = '1';
-                    menu.run(args, _=> {
+                    menu.run(args, _ => {
                         process.nextTick(() => {
                             // expect session to be deleted
                             expect(session[args.sessionId]).to.not.be.ok;
                             done();
                         });
-                        
+
                     });
                 });
 
 
-                
+
             });
 
 
         });
 
-    }); 
-    
-    describe('Error handling', function(){
+    });
 
-        it('should emit error when route cannot be reached', function(done) {
+    describe('Error handling', function () {
+
+        it('should emit error when route cannot be reached', function (done) {
             menu = new UssdMenu();
             menu.startState({
                 run: () => {
@@ -704,7 +704,7 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should emit error when run function not defined on matched route', function(done){
+        it('should emit error when run function not defined on matched route', function (done) {
             menu = new UssdMenu();
             menu.startState({
                 run: () => {
@@ -721,18 +721,18 @@ describe('UssdMenu', function(){
                 done();
             });
             menu.run(args);
-            
+
         });
 
-        describe('Session Handler errors', function(){
-            
-            it('should emit error when session start handler returns error in callback', function(done){
+        describe('Session Handler errors', function () {
+
+            it('should emit error when session start handler returns error in callback', function (done) {
                 let config = {
                     start: (sessionId, cb) => {
                         cb(new Error('start error'));
                     },
                 };
-                
+
                 menu.on('error', err => {
                     expect(err).to.be.an('error');
                     expect(err.message).to.equal('start error');
@@ -743,7 +743,7 @@ describe('UssdMenu', function(){
 
             });
 
-            it('should emit error when session start handler returns error in promise', function(done){
+            it('should emit error when session start handler returns error in promise', function (done) {
                 let config = {
                     start: () => {
                         return new Promise((resolve, reject) => {
@@ -751,7 +751,7 @@ describe('UssdMenu', function(){
                         });
                     },
                 };
-                
+
                 menu.on('error', err => {
                     expect(err).to.be.an('error');
                     expect(err.message).to.equal('start error');
@@ -762,7 +762,7 @@ describe('UssdMenu', function(){
 
             });
 
-            it('should emit error when session start handler throws error in promise', function(done){
+            it('should emit error when session start handler throws error in promise', function (done) {
                 let config = {
                     start: () => {
                         return new Promise(() => {
@@ -770,7 +770,7 @@ describe('UssdMenu', function(){
                         });
                     },
                 };
-                
+
                 menu.on('error', err => {
                     expect(err).to.be.an('error');
                     expect(err.message).to.equal('start error');
@@ -781,7 +781,7 @@ describe('UssdMenu', function(){
 
             });
 
-            it('should emit error when set handler returns error in callback', function(done){
+            it('should emit error when set handler returns error in callback', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -796,7 +796,7 @@ describe('UssdMenu', function(){
                     expect(err.message).to.equal('set error');
                     done();
                 });
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.set('key', 'value');
@@ -806,7 +806,7 @@ describe('UssdMenu', function(){
 
             });
 
-            it('should emit error when set handler returns error in promise', function(done){
+            it('should emit error when set handler returns error in promise', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -823,7 +823,7 @@ describe('UssdMenu', function(){
                     expect(err.message).to.equal('set error');
                     done();
                 });
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.set('key', 'value');
@@ -833,7 +833,7 @@ describe('UssdMenu', function(){
 
             });
 
-            it('should emit error when set handler throws error in promise', function(done){
+            it('should emit error when set handler throws error in promise', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -850,7 +850,7 @@ describe('UssdMenu', function(){
                     expect(err.message).to.equal('set error');
                     done();
                 });
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.set('key', 'value');
@@ -861,7 +861,7 @@ describe('UssdMenu', function(){
             });
 
 
-            it('should pass error in callback to session.set when set handler passes error to callback', function(done){
+            it('should pass error in callback to session.set when set handler passes error to callback', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -871,7 +871,7 @@ describe('UssdMenu', function(){
                     },
                 };
                 menu.sessionConfig(config);
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.set('key', 'value', err => {
@@ -885,7 +885,7 @@ describe('UssdMenu', function(){
             });
 
 
-            it('should catch error in promise in session.set when set handler passes error to callback', function(done){
+            it('should catch error in promise in session.set when set handler passes error to callback', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -895,22 +895,22 @@ describe('UssdMenu', function(){
                     },
                 };
                 menu.sessionConfig(config);
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.set('key', 'value')
-                        .catch(err => {
-                            expect(err).to.be.an('error');
-                            expect(err.message).to.equal('set error');
-                            done();
-                        });
+                            .catch(err => {
+                                expect(err).to.be.an('error');
+                                expect(err.message).to.equal('set error');
+                                done();
+                            });
                     }
                 });
                 menu.run(args);
             });
 
 
-            it('should pass error in callback to session.set when set handler rejects error in promise', function(done){
+            it('should pass error in callback to session.set when set handler rejects error in promise', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -922,7 +922,7 @@ describe('UssdMenu', function(){
                     },
                 };
                 menu.sessionConfig(config);
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.set('key', 'value', err => {
@@ -936,7 +936,7 @@ describe('UssdMenu', function(){
             });
 
 
-            it('should catch error in promise in session.set when set handler rejects error in promise', function(done){
+            it('should catch error in promise in session.set when set handler rejects error in promise', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -948,15 +948,15 @@ describe('UssdMenu', function(){
                     },
                 };
                 menu.sessionConfig(config);
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.set('key', 'value')
-                        .catch(err => {
-                            expect(err).to.be.an('error');
-                            expect(err.message).to.equal('set error');
-                            done();
-                        });
+                            .catch(err => {
+                                expect(err).to.be.an('error');
+                                expect(err.message).to.equal('set error');
+                                done();
+                            });
                     }
                 });
                 menu.run(args);
@@ -964,7 +964,7 @@ describe('UssdMenu', function(){
 
 
 
-            it('should emit error when get handler returns error in callback', function(done){
+            it('should emit error when get handler returns error in callback', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -979,7 +979,7 @@ describe('UssdMenu', function(){
                     expect(err.message).to.equal('set error');
                     done();
                 });
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.get('key');
@@ -990,13 +990,13 @@ describe('UssdMenu', function(){
             });
 
 
-            it('should emit error when get handler returns error in promise', function(done){
+            it('should emit error when get handler returns error in promise', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
                     },
                     get: () => {
-                        return new Promise( (resolve, reject) => {
+                        return new Promise((resolve, reject) => {
                             return reject(new Error('set error'));
                         });
                     },
@@ -1007,7 +1007,7 @@ describe('UssdMenu', function(){
                     expect(err.message).to.equal('set error');
                     done();
                 });
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.get('key');
@@ -1018,13 +1018,13 @@ describe('UssdMenu', function(){
             });
 
 
-            it('should emit error when get handler throws error in promise', function(done){
+            it('should emit error when get handler throws error in promise', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
                     },
                     get: () => {
-                        return new Promise( () => {
+                        return new Promise(() => {
                             throw new Error('set error');
                         });
                     },
@@ -1035,7 +1035,7 @@ describe('UssdMenu', function(){
                     expect(err.message).to.equal('set error');
                     done();
                 });
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.get('key');
@@ -1045,7 +1045,7 @@ describe('UssdMenu', function(){
 
             });
 
-            it('should pass error in callback to session.get when get handler passes error to callback', function(done){
+            it('should pass error in callback to session.get when get handler passes error to callback', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -1055,7 +1055,7 @@ describe('UssdMenu', function(){
                     },
                 };
                 menu.sessionConfig(config);
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.get('key', err => {
@@ -1069,7 +1069,7 @@ describe('UssdMenu', function(){
             });
 
 
-            it('should catch error in promise in session.get when get handler passes error to callback', function(done){
+            it('should catch error in promise in session.get when get handler passes error to callback', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -1079,22 +1079,22 @@ describe('UssdMenu', function(){
                     },
                 };
                 menu.sessionConfig(config);
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.get('key')
-                        .catch(err => {
-                            expect(err).to.be.an('error');
-                            expect(err.message).to.equal('get error');
-                            done();
-                        });
+                            .catch(err => {
+                                expect(err).to.be.an('error');
+                                expect(err.message).to.equal('get error');
+                                done();
+                            });
                     }
                 });
                 menu.run(args);
             });
 
 
-            it('should pass error in callback to session.get when get handler rejects error in promise', function(done){
+            it('should pass error in callback to session.get when get handler rejects error in promise', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -1106,7 +1106,7 @@ describe('UssdMenu', function(){
                     },
                 };
                 menu.sessionConfig(config);
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.get('key', err => {
@@ -1120,7 +1120,7 @@ describe('UssdMenu', function(){
             });
 
 
-            it('should catch error in promise in session.get when get handler passes error to callback', function(done){
+            it('should catch error in promise in session.get when get handler passes error to callback', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -1132,15 +1132,15 @@ describe('UssdMenu', function(){
                     },
                 };
                 menu.sessionConfig(config);
-                
+
                 menu.startState({
                     run: () => {
                         menu.session.get('key')
-                        .catch(err => {
-                            expect(err).to.be.an('error');
-                            expect(err.message).to.equal('get error');
-                            done();
-                        });
+                            .catch(err => {
+                                expect(err).to.be.an('error');
+                                expect(err.message).to.equal('get error');
+                                done();
+                            });
                     }
                 });
                 menu.run(args);
@@ -1149,7 +1149,7 @@ describe('UssdMenu', function(){
             // SESSION END HANDLER
 
 
-            it('should emit error when session end handler returns error in callback', function(done){
+            it('should emit error when session end handler returns error in callback', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -1158,7 +1158,7 @@ describe('UssdMenu', function(){
                         cb(new Error('end error'));
                     }
                 };
-                
+
                 menu.on('error', err => {
                     expect(err).to.be.an('error');
                     expect(err.message).to.equal('end error');
@@ -1174,7 +1174,7 @@ describe('UssdMenu', function(){
 
             });
 
-            it('should emit error when session end handler returns error in promise', function(done){
+            it('should emit error when session end handler returns error in promise', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -1185,7 +1185,7 @@ describe('UssdMenu', function(){
                         });
                     }
                 };
-                
+
                 menu.on('error', err => {
                     expect(err).to.be.an('error');
                     expect(err.message).to.equal('end error');
@@ -1202,7 +1202,7 @@ describe('UssdMenu', function(){
             });
 
 
-            it('should emit error when session end handler throws error in promise', function(done){
+            it('should emit error when session end handler throws error in promise', function (done) {
                 let config = {
                     start: (id, cb) => {
                         cb();
@@ -1213,7 +1213,7 @@ describe('UssdMenu', function(){
                         });
                     }
                 };
-                
+
                 menu.on('error', err => {
                     expect(err).to.be.an('error');
                     expect(err.message).to.equal('end error');
@@ -1229,12 +1229,12 @@ describe('UssdMenu', function(){
 
             });
 
-            
+
         });
 
     });
 
-    describe('Hubtel Support', function() {
+    describe('Hubtel Support', function () {
         let menu;
         let session = {};
         let args;
@@ -1242,7 +1242,7 @@ describe('UssdMenu', function(){
         let config = {
             start: (id) => {
                 return new Promise((resolve, reject) => {
-                    if(!(id in session)) session[id] = {};
+                    if (!(id in session)) session[id] = {};
                     return resolve();
                 });
             },
@@ -1266,7 +1266,7 @@ describe('UssdMenu', function(){
             }
         };
 
-        beforeEach(function(){
+        beforeEach(function () {
             menu = new UssdMenu({ provider: 'hubtel' });
             session = {};
             args = {
@@ -1280,7 +1280,7 @@ describe('UssdMenu', function(){
             };
         });
 
-        it('should emit error when invalid provider in menu config', function(done) {
+        it('should emit error when invalid provider in menu config', function (done) {
             try {
                 menu = new UssdMenu({ provider: 'otherTelco' });
             } catch (err) {
@@ -1289,7 +1289,7 @@ describe('UssdMenu', function(){
             }
         });
 
-        it('should emit error when session config not set up', function(done) {
+        it('should emit error when session config not set up', function (done) {
             menu = new UssdMenu({ provider: 'hubtel' });
             menu.startState({
                 run: () => {
@@ -1304,7 +1304,7 @@ describe('UssdMenu', function(){
             menu.run(args);
         });
 
-        it('should emit error if unable to map route', function(done){
+        it('should emit error if unable to map route', function (done) {
             menu = new UssdMenu({ provider: 'hubtel' });
             args.Message = '1';
             args.Type = 'Initiation';
@@ -1355,7 +1355,7 @@ describe('UssdMenu', function(){
 
         });
 
-        it('should map incoming hubtel request to menu.args', function(done) {
+        it('should map incoming hubtel request to menu.args', function (done) {
             menu.sessionConfig(config);
 
             args.Message = '1';
@@ -1365,7 +1365,7 @@ describe('UssdMenu', function(){
                 }
             });
             menu.state('state1', {
-                run: function(state){
+                run: function (state) {
                     expect(state.menu.args.phoneNumber).to.equal(`+${args.Mobile}`);
                     expect(state.menu.args.sessionId).to.equal(args.SessionId);
                     expect(state.menu.args.serviceCode).to.equal(args.ServiceCode);
@@ -1378,7 +1378,7 @@ describe('UssdMenu', function(){
 
             menu.run(args);
         });
-        it('should override message from Initiation call with empty string', function(done) {
+        it('should override message from Initiation call with empty string', function (done) {
             menu.sessionConfig(config);
             const initArgs = Object.assign(args, {
                 Sequence: 1,
@@ -1387,7 +1387,7 @@ describe('UssdMenu', function(){
             });
 
             menu.startState({
-                run: function(state) {
+                run: function (state) {
                     expect(menu.val).to.equal('');
                     expect(state.menu.args.text).to.equal('');
                     done();
@@ -1397,7 +1397,7 @@ describe('UssdMenu', function(){
             menu.run(initArgs);
         });
 
-        it('should return Response object from menu.con', function(done) {
+        it('should return Response object from menu.con', function (done) {
             menu.sessionConfig(config);
             menu.startState({
                 run: () => {
@@ -1413,7 +1413,7 @@ describe('UssdMenu', function(){
             });
         });
 
-        it('should return Release object from menu.end', function(done) {
+        it('should return Release object from menu.end', function (done) {
             menu.sessionConfig(config);
             menu.startState({
                 run: () => {
@@ -1429,7 +1429,7 @@ describe('UssdMenu', function(){
             });
         });
 
-        it('should be able to map first text to route', function(done) {
+        it('should be able to map first text to route', function (done) {
             menu.sessionConfig(config);
 
             const testResponse = 'state1 response';
@@ -1461,7 +1461,7 @@ describe('UssdMenu', function(){
                 });
             });
         });
-        it('should be able to map text after first sequence to route', function(done) {
+        it('should be able to map text after first sequence to route', function (done) {
             menu.sessionConfig(config);
 
             const initArgs = Object.assign({}, args, {
@@ -1519,6 +1519,21 @@ describe('UssdMenu', function(){
                         done();
                     });
                 });
+            });
+        });
+
+    });
+    describe("Menu Run Returns Promise", function () {
+        it('menu.run should return a resolvable promise', function (done) {
+            let message = 'It works!';
+            menu.startState({
+                run: function () {
+                    menu.end(message);
+                }
+            });
+            menu.run(args).then(function (res) {
+                expect(res).to.equal('END ' + message);
+                done();
             });
         });
 

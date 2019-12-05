@@ -50,7 +50,7 @@ declare class UssdMenu extends EventEmitter {
 
     resolveRoute(route: string, callback: Function): void;
 
-    run(args: UssdMenu.UssdGatewayArgs, onResult?: Function): void;
+    run(args: UssdMenu.UssdGatewayArgs, onResult?: Function): Promise<string>;
 
     runState(state: UssdState): void;
 
