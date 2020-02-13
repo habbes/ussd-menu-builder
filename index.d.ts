@@ -46,9 +46,12 @@ declare class UssdMenu extends EventEmitter {
 
     mapArgs(args: UssdMenu.UssdGatewayArgs | UssdMenu.HubtelArgs): UssdMenu.UssdGatewayArgs;
 
+
     onResult?(result: string | UssdMenu.HubtelResponse): void;
 
     resolveRoute(route: string, callback: Function): void;
+
+    resolve?(value: string): void;
 
     run(args: UssdMenu.UssdGatewayArgs, onResult?: Function): Promise<string>;
 
